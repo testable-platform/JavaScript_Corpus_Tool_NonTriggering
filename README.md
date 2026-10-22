@@ -87,54 +87,8 @@ node packages/shared/src/index.js
 ```
 npm test              # mocha packages/shared/tests/**/*.test.js
 npm run coverage      # nyc + mocha
-node "Tool Triggering (Synthetic Data)/full_check.js"   # cross-file consistency audit
 ```
 
-
-## Tool test-data folders
-
-Three sibling folders sit at the repo root, alongside this branch's own
-`Tool Triggering (Synthetic Data)/` (above).
-
-### `Tool Triggering (Tool Github Test data)/`
-One subfolder for each of the 23 tools of the tool list. Each holds that tool's own
-upstream test files, copied from its actual GitHub project and not generated, plus a
-small generated overlay (a short `README.md` and, for some tools, `package.json`,
-`src/` and `nodeNN/` folders). A correct run finds whatever that upstream project's
-own tests genuinely contain. Almost every upstream file is byte-identical to the
-upstream repository; a small number differ from the upstream project's current HEAD.
-
-### `Tool Clean (Synthetic Data)/`
-One subfolder for each of the 23 tools, engineered to be clean so the tool should
-report zero findings: the **Tool Clean (100% pass)** condition. 20 of the 23 tools carry
-five per-family subfolders (`node12`, `node14`, `node20`, `node24`, `node26`); these
-five boundary families stand in for the nine Node versions of this corpus's branches.
-`Git-Spark`, `diff-cover` and `pydriller` mine git history, so each carries one real
-history instead of per-family copies, stored as a bundle in `_git-bundles/` and
-restored with `restore-git.ps1`. CodeQL, OpenGrep and trivy were not installed in
-the build environment; that is recorded in the folder's README.
-
-### `Tool Invalid (Synthetic Data)/`
-Same shape as Clean -- 23 tools, the same five boundary families -- but engineered so
-every fixture makes the tool flag or fail rather than pass: the **Tool Invalid**
-condition. `Git-Spark`, `diff-cover` and `pydriller` carry their history the same way,
-as bundles in `_git-bundles/` (restored with `restore-git.ps1`).
-
-## Tool entry points
-
-Every tool directory carries a `trigger.yaml` recording its pin, its
-declared status and what a working run should find. Run one tool directly,
-or all of them:
-
-```
-bash "Tool Triggering (Synthetic Data)/eslint/run_eslint.sh"
-node "Tool Triggering (Synthetic Data)/tool_integration.js" --run
-node "Tool Triggering (Synthetic Data)/tool_integration.js" --verify
-```
-
-`--run` distinguishes three outcomes: a tool that ran, a tool that skipped
-for a reason `dataset.json` already records, and a tool that skipped for a
-reason it does not. Only the third is a finding.
 
 ## Planted fixtures
 
@@ -147,10 +101,6 @@ reason it does not. Only the third is a finding.
 ```
 javascript-combos/  (JS_V26_PARCEL_BUN_MICRO)
 |-- .github/
-|-- Tool Clean (Synthetic Data)/
-|-- Tool Invalid (Synthetic Data)/
-|-- Tool Triggering (Synthetic Data)/  (24 tool directories + _skip.sh, tool_integration.js, full_check.js)
-|-- Tool Triggering (Tool Github Test data)/
 |-- packages/
 |-- scripts/
 |-- .gitignore
@@ -193,9 +143,7 @@ method (npm registry `engines.node` ranges, prereleases excluded).
 <!-- tools-non-triggering -->
 ## Tools non triggering (Synthetic Data)
 
-A fifth per-branch data folder, beside `Tool Clean (Synthetic Data)`,
-`Tool Invalid (Synthetic Data)`, `Tool Triggering (Synthetic Data)` and
-`Tool Triggering (Tool Github Test data)`.
+One of five per-branch data folders in the original combined `testable-platform/javascript-corpus` repo -- this repo carries only this one.
 
 Clean makes each tool run and report nothing wrong. Invalid makes it run and
 report something. This folder holds data with nothing in it for any tool to
@@ -206,8 +154,7 @@ apart from *the scan never ran*.
 `Tools non triggering (Synthetic Data)/` holds 23 tool-named folders, matching the names in Clean
 and Invalid so the data sets line up name-for-name:
 
-* **11 tools read source**, so they get a minimal program per boundary
-  family (node12, node14, node20, node24, node26) -- one class or one function, no branching, no
+* **11 tools read source**, so they get their own minimal program, for node26 -- one class or one function, no branching, no
   duplication, no dependency, no dead export, no magic number.
 * **12 tools cannot be answered by a program** -- they read a lockfile,
   a coverage report, compiled bytecode or the commit history -- so they carry
